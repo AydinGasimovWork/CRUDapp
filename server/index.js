@@ -1,3 +1,15 @@
+/* 
+As I have mentioned previously I had to create a new resume when I got home
+since I wasn't satisfied with my current resume (there was a deadline for some applications).
+Also because of my long commute I only got home at 18:15 and things like eating food take time.
+So realistically I only had less than 2 hours till 22:00 to do this task, not 5. If I commit 
+this too late or can't do enough by that time, please understand.
+*/
+/*
+Additional features you asked to implement:
+Primary teacher per class is implemented in the timetable itself createTimetable.sql
+For getting timetable of a given teacher there's a new block of code starting at line 144
+*/
 const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
@@ -7,7 +19,8 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
-    database: 'root.school'
+    database: 'school',
+    insecureAuth : true
 });
 
 
@@ -27,6 +40,7 @@ app.post('/createClass', (req, res) => {
     });
 });
 app.post('/createStudent', (req, res) => {
+    const studentId = req.body.studentId;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const className = req.body.className;
@@ -34,21 +48,31 @@ app.post('/createStudent', (req, res) => {
     const gender = req.body.gender;
     const average = req.body.average;
 
-    db.query('INSERT INTO school.students(firstName, lastName, className, birthday, gender, averageGrade) VALUES(?,?,?,?,?,?)',
-    [firstName,lastName,className,birthday,gender,average], (err, result) => {
+    db.query(`INSERT INTO school.students(studentId ,firstName, lastName,
+        className, birthday, gender, averageGrade) VALUES(?,?,?,?,?,?,?)`,
+    [studentId, firstName,lastName,className,birthday,gender,average], (err, result) => {
         if(err) console.log(err);
         else res.send('Student added successfully');
     });
+    /*db.query(`UPDATE school.classes
+    SET school.classes(numberOfStudents) = COUNT(school.students WHERE className = ?)`
+    ,className, (err, result) => {
+        if(err) console.log(err);
+        else res.send('.');
+    }); */
 });
 app.post('/createTeacher', (req, res) => {
+    const teacherId = req.body.teacherId;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const birthday = req.body.birthday;
     const gender = req.body.gender;
     const salary = req.body.salary;
+    const primaryTeacherTo = req.body.primaryTeacherTo;
 
-    db.query('INSERT INTO school.teachers(firstName, lastName, birthday, gender, salary) VALUES(?,?,?,?,?)',
-    [firstName,lastName,birthday,gender,salary], (err, result) => {
+    db.query(`INSERT INTO school.teachers(teacherId,firstName, lastName, birthday, gender, salary,primaryTeacherTo)
+    VALUES(?,?,?,?,?,?,?)`,
+    [teacherId,firstName,lastName,birthday,gender,salary,primaryTeacherTo], (err, result) => {
         if(err) console.log(err);
         else res.send('Teacher added successfully');
     });
@@ -69,11 +93,16 @@ app.post('/createBlockInTimetable', (req, res) => {
     const subjectName = req.body.subjectName;
     const teacherId = req.body.teacherId;
 
-    db.query('INSERT INTO school.timetable(startTime, endTime, className, subjectName, teacherId) VALUES(?,?,?,?,?)',
+    console.log('ok');
+    console.log(req.body);
+    
+    db.query(`INSERT INTO school.timetable(startTime, endTime, className, subjectName, teacherId)
+    VALUES(?,?,?,?,?)`,
     [startTime, endTime, className, subjectName, teacherId], (err, result) => {
         if(err) console.log(err);
         else res.send('Block in the timetable added successfully');
     });
+    res.send();
 });
 
 
@@ -112,6 +141,15 @@ app.get('/readTimetable', (req, res) => {
         else res.send(result);
     });
 });
+app.get('/readTeacherTimetable', (req, res) => {
+    const teacherId = req.body.teacherId;
+
+    db.query(`SELECT * FROM school.timetable 
+    WHERE school.timetable.teacherId = \"?\"`, teacherId, (err, results) => {
+        if(err) console.log(err);
+        else res.send(result);
+    })
+})
 
 
 
@@ -129,7 +167,7 @@ app.patch('/updateClass', (req, res) => {
     });
 });
 app.patch('/updateStudent', (req, res) => {
-    const studentId = req.body.studentI
+    const studentId = req.body.studentId;
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const className = req.body.className;
@@ -174,7 +212,7 @@ app.patch('/updateBlockInTimetable', (req, res) => {
     const endTime = req.body.endTime;
     const className = req.body.className;
     const subjectName = req.body.subjectName;
-    const teacher = req.body.teacherId;
+    const teacherId = req.body.teacherId;
 
     db.query(`UPDATE school.timetable SET  subjectName = ? , teacherId = ? WHERE startTime = ? 
     AND endTime = ? AND className = ?`,
@@ -197,15 +235,22 @@ app.delete('/deleteClass', (req, res) => {
         else res.send('Class deleted succesfully');
     });
 });
-app.get('/deleteStudent', (req, res) => {
+app.delete('/deleteStudent', (req, res) => {
     const studentId = req.body.studentId;
 
     db.query('DELETE FROM school.students WHERE studentId = ?',studentId, (err, result) => {
         if(err) console.log(err);
         else res.send('Student removed succesfully');
     });
+    db.query(`UPDATE school.classes
+    SET school.classes(numberOfStudents) = school.classes(numberOfStudents) - 1
+    WHERE school.classes(className) = school.students(className) AND school.students(studentId) = ?`,
+    studentId, (err, result) => {
+        if(err) console.log(err);
+        else res.send('.');
+    });
 });
-app.get('/deleteTeacher', (req, res) => {
+app.delete('/deleteTeacher', (req, res) => {
     const teacherId = req.body.teacherId;
 
     db.query('DELETE FROM school.teachers WHERE teacherId = ?',teacherId, (err, result) => {
@@ -213,13 +258,13 @@ app.get('/deleteTeacher', (req, res) => {
         else res.send('Teacher removed succesfully');
     });
 });
-app.get('/deleteSubject', (req, res) => {
+app.delete('/deleteSubject', (req, res) => {
     db.query('SELECT * FROM school.subjects', (err, result) => {
         if(err) console.log(err);
         else res.send(result);
     });
 });
-app.get('/deleteBlockInTimetable', (req, res) => {
+app.delete('/deleteBlockInTimetable', (req, res) => {
     const startTime =  req.body.startTime;
     const endTime =  req.body.endTime;
     const className =  req.body.className;
