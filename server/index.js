@@ -8,7 +8,7 @@ this too late or can't do enough by that time, please understand.
 /*
 Additional features you asked to implement:
 Primary teacher per class is implemented in the timetable itself createTimetable.sql
-For getting timetable of a given teacher there's a new block of code starting at line 144
+For getting timetable of a given teacher there's a new block of code starting at line 145
 */
 const express = require('express');
 const mysql = require('mysql');
@@ -55,7 +55,8 @@ app.post('/createStudent', (req, res) => {
         else res.send('Student added successfully');
     });
     /*db.query(`UPDATE school.classes
-    SET school.classes(numberOfStudents) = COUNT(school.students WHERE className = ?)`
+    SET school.classes(numberOfStudents) = school.classes(numberOfStudents) + 1
+    IF school.classes(className) = school.students(className) AND school.students(studentId) = \'?\'`
     ,className, (err, result) => {
         if(err) console.log(err);
         else res.send('.');
@@ -242,13 +243,13 @@ app.delete('/deleteStudent', (req, res) => {
         if(err) console.log(err);
         else res.send('Student removed succesfully');
     });
-    db.query(`UPDATE school.classes
+    /* db.query(`UPDATE school.classes
     SET school.classes(numberOfStudents) = school.classes(numberOfStudents) - 1
-    WHERE school.classes(className) = school.students(className) AND school.students(studentId) = ?`,
+    IF school.classes(className) = school.students(className) AND school.students(studentId) = \'?\'`,
     studentId, (err, result) => {
         if(err) console.log(err);
         else res.send('.');
-    });
+    }); */
 });
 app.delete('/deleteTeacher', (req, res) => {
     const teacherId = req.body.teacherId;
