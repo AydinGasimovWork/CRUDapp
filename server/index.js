@@ -145,7 +145,7 @@ app.get('/readTeacherTimetable', (req, res) => {
     const teacherId = req.body.teacherId;
 
     db.query(`SELECT * FROM school.timetable 
-    WHERE school.timetable.teacherId = \"?\"`, teacherId, (err, results) => {
+    WHERE school.timetable.teacherId = \"?\";`, teacherId, (err, result) => {
         if(err) console.log(err);
         else res.send(result);
     })
