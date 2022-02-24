@@ -1,10 +1,3 @@
-/* 
-As I have mentioned previously I had to create a new resume when I got home
-since I wasn't satisfied with my current resume (there was a deadline for some applications).
-Also because of my long commute I only got home at 18:15 and things like eating food take time.
-So realistically I only had less than 2 hours till 22:00 to do this task, not 5. If I commit 
-this too late or can't do enough by that time, please understand.
-*/
 /*
 Additional features you asked to implement:
 Primary teacher per class is implemented in the timetable itself createTimetable.sql
