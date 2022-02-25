@@ -1,8 +1,3 @@
-/*
-Additional features you asked to implement:
-Primary teacher per class is implemented in the timetable itself createTimetable.sql
-For getting timetable of a given teacher there's a new block of code starting at line 145
-*/
 const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
@@ -47,13 +42,6 @@ app.post('/createStudent', (req, res) => {
         if(err) console.log(err);
         else res.send('Student added successfully');
     });
-    /*db.query(`UPDATE school.classes
-    SET school.classes(numberOfStudents) = school.classes(numberOfStudents) + 1
-    IF school.classes(className) = school.students(className) AND school.students(studentId) = \'?\'`
-    ,className, (err, result) => {
-        if(err) console.log(err);
-        else res.send('.');
-    }); */
 });
 app.post('/createTeacher', (req, res) => {
     const teacherId = req.body.teacherId;
@@ -62,11 +50,10 @@ app.post('/createTeacher', (req, res) => {
     const birthday = req.body.birthday;
     const gender = req.body.gender;
     const salary = req.body.salary;
-    const primaryTeacherTo = req.body.primaryTeacherTo;
 
-    db.query(`INSERT INTO school.teachers(teacherId,firstName, lastName, birthday, gender, salary,primaryTeacherTo)
-    VALUES(?,?,?,?,?,?,?)`,
-    [teacherId,firstName,lastName,birthday,gender,salary,primaryTeacherTo], (err, result) => {
+    db.query(`INSERT INTO school.teachers(teacherId,firstName, lastName, birthday, gender, salary)
+    VALUES(?,?,?,?,?,?)`,
+    [teacherId,firstName,lastName,birthday,gender,salary], (err, result) => {
         if(err) console.log(err);
         else res.send('Teacher added successfully');
     });
@@ -135,16 +122,6 @@ app.get('/readTimetable', (req, res) => {
         else res.send(result);
     });
 });
-app.get('/readTeacherTimetable', (req, res) => {
-    const teacherId = req.body.teacherId;
-
-    db.query(`SELECT * FROM school.timetable 
-    WHERE school.timetable.teacherId = \"?\";`, teacherId, (err, result) => {
-        if(err) console.log(err);
-        else res.send(result);
-    })
-})
-
 
 
 
@@ -236,13 +213,6 @@ app.delete('/deleteStudent', (req, res) => {
         if(err) console.log(err);
         else res.send('Student removed succesfully');
     });
-    /* db.query(`UPDATE school.classes
-    SET school.classes(numberOfStudents) = school.classes(numberOfStudents) - 1
-    IF school.classes(className) = school.students(className) AND school.students(studentId) = \'?\'`,
-    studentId, (err, result) => {
-        if(err) console.log(err);
-        else res.send('.');
-    }); */
 });
 app.delete('/deleteTeacher', (req, res) => {
     const teacherId = req.body.teacherId;

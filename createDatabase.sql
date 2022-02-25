@@ -21,8 +21,6 @@ CREATE TABLE school.teachers(
     birthday DATE,
     gender VARCHAR(1),
     salary INT,
-    primaryTeacherTo VARCHAR(5) DEFAULT NULL,
-    FOREIGN KEY(primaryTeacherTo) REFERENCES school.classes(className) ON DELETE SET NULL
 );
 CREATE TABLE school.subjects(
 	subjectName VARCHAR(40) PRIMARY KEY
